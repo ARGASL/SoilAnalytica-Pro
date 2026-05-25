@@ -320,7 +320,7 @@ st.caption("ANÁLISIS CUANTITATIVO DE CROMATOGRAFÍAS DE SUELO")
 
 col_id, col_file = st.columns([1, 2])
 with col_id:
-    id_input = st.text_input("ID de la muestra", placeholder="Ej: M1, POTRERO-A")
+    id_input = st.text_input("ID de la muestra", placeholder="Ej: M1")
 with col_file:
     archivo = st.file_uploader("Cargar imagen del cromatograma", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
 
