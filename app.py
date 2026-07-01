@@ -295,6 +295,81 @@ def generar_informe(id_m, analisis, caracteristicas):
     """
     
     return txt_oxi, txt_min, txt_bio, conclusion
+    
+# *****************************************************************************
+# ********** INICIO: COMPONENTE PARA PDF DESCARGABLE (FUNCIÓN) ****************
+# *****************************************************************************
+def exportar_pdf(id_m, analisis, conclusion):
+    pdf = FPDF()
+    pdf.add_page()
+    
+    # Encabezado oscuro institucional
+    pdf.set_fill_color(14, 17, 23)
+    pdf.rect(0, 0, 210, 38, 'F')
+    
+    pdf.set_font("Arial", "B", 18)
+    pdf.set_textcolor(255, 255, 255)
+    pdf.cell(0, 10, "SoilAnalytica Pro - Reporte Tecnico", ln=True, align="C")
+    pdf.set_font("Arial", "I", 10)
+    pdf.cell(0, 5, "ANALYTICS & DIAGNOSTIC SYSTEM", ln=True, align="C")
+    pdf.ln(12)
+    
+    # Datos generales de la muestra
+    pdf.set_textcolor(0, 0, 0)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 8, f"ID de la Muestra: {id_m}", ln=True)
+    pdf.set_font("Arial", "", 10)
+    pdf.cell(0, 6, "Tipo de analisis: Cromatografia de Suelo (Pfeiffer)", ln=True)
+    pdf.ln(5)
+    
+    # Estructuración de Tabla Cuantitativa
+    pdf.set_font("Arial", "B", 11)
+    pdf.set_fill_color(30, 41, 59)
+    pdf.set_textcolor(255, 255, 255)
+    
+    pdf.cell(60, 8, " Indicador", border=1, fill=True)
+    pdf.cell(40, 8, " Valor Obtenido", border=1, fill=True, align="C")
+    pdf.cell(90, 8, " Diagnostico Morfologico", border=1, fill=True)
+    pdf.ln()
+    
+    pdf.set_textcolor(0, 0, 0)
+    pdf.set_font("Arial", "", 10)
+    
+    pdf.cell(60, 8, " Oxigenacion (Nucleo)", border=1)
+    pdf.cell(40, 8, f" {analisis['oxigenacion']}%", border=1, align="C")
+    pdf.cell(90, 8, f" {analisis['patron_plumas'][:45]}...", border=1)
+    pdf.ln()
+    
+    pdf.cell(60, 8, " Mineralizacion (Zona Media)", border=1)
+    pdf.cell(40, 8, f" {analisis['mineralizacion']}%", border=1, align="C")
+    pdf.cell(90, 8, f" {analisis['mineral_predominante'][:45]}...", border=1)
+    pdf.ln()
+    
+    pdf.cell(60, 8, " Biologia (Zona Externa)", border=1)
+    pdf.cell(40, 8, f" {analisis['biologia']}%", border=1, align="C")
+    pdf.cell(90, 8, f" {analisis['actividad_enzimatica'][:45]}...", border=1)
+    pdf.ln()
+    pdf.ln(6)
+    
+    # Bloque de Conclusiones y Plan de Manejo
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 8, "Interpretacion Global y Plan de Manejo", ln=True)
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+    pdf.ln(3)
+    
+    pdf.set_font("Arial", "", 10)
+    # Limpieza de caracteres de formato markdown para el PDF
+    texto_limpio = conclusion.replace("**", "").replace("•", "-")
+    pdf.multi_cell(0, 5, texto_limpio)
+    
+    pdf.ln(15)
+    pdf.set_font("Arial", "B", 9)
+    pdf.cell(0, 4, "SoilAnalytica Pro Intel Lab", ln=True, align="C")
+    
+    return pdf.output()
+# *****************************************************************************
+# ********** FIN: COMPONENTE PARA PDF DESCARGABLE (FUNCIÓN) *******************
+# *****************************************************************************
 
 # Sidebar
 with st.sidebar:
