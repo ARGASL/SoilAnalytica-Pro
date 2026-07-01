@@ -423,15 +423,67 @@ if 'id_actual' in st.session_state:
         
         st.divider()
         
-        # LO QUE SE AGREGÓ: UI limpia para desplegar las nuevas métricas morfológicas extraídas
-        st.markdown("### 🔍 Análisis Morfológico y Cromático Avanzado")
-        col_inf1, col_inf2 = st.columns(2)
-        with col_inf1:
-            st.info(f"**Análisis de Plumas (Matriz Mineral):**\n{analisis['patron_plumas']}")
-            st.info(f"**Fase Cromática Multiespectral (HSV):**\n{analisis['mineral_predominante']}")
-        with col_inf2:
-            st.info(f"**Evaluación de Orillas (Actividad Enzimática):**\n{analisis['actividad_enzimatica']}")
+       # =========================================================================
+        # SECCIÓN REDISEÑADA: ANÁLISIS AVANZADO Y GEOLOCALIZACIÓN SATELITAL
+        # =========================================================================
+        st.markdown("### 🔍 Análisis Morfológico, Cromático y Georreferenciación")
+        
+        col_bloque_izq, col_bloque_der = st.columns([1, 1])
+        
+        with col_bloque_izq:
+            st.markdown("<p style='color: #aaa; font-size: 13px; font-weight: bold; margin-bottom: 8px;'>DIAGNÓSTICO FORMAL DE MATRIZ</p>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 12px;">
+                <span style="color: #58a6ff; font-weight: bold;">🪶 Análisis de Plumas:</span> 
+                <div style="color: #e6edf3; font-size: 14px; margin-top: 4px;">{analisis['patron_plumas']}</div>
+            </div>
+            <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 12px;">
+                <span style="color: #ff7b72; font-weight: bold;">🎨 Fase Cromática (HSV):</span> 
+                <div style="color: #e6edf3; font-size: 14px; margin-top: 4px;">{analisis['mineral_predominante']}</div>
+            </div>
+            <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 12px;">
+                <span style="color: #7ee787; font-weight: bold;">🌊 Evaluación de Orillas:</span> 
+                <div style="color: #e6edf3; font-size: 14px; margin-top: 4px;">{analisis['actividad_enzimatica']}</div>
+            </div>
+            """, unsafe_allow_html=True)
             
+        with col_bloque_der:
+            st.markdown("<p style='color: #aaa; font-size: 13px; font-weight: bold; margin-bottom: 8px;'>📍 COORDENADAS DE ORIGEN (VISTA DE SATÉLITE)</p>", unsafe_allow_html=True)
+            
+            col_lat, col_lon = st.columns(2)
+            with col_lat:
+                lat_input = st.number_input("Latitud", value=-12.0464, format="%.6f", key=f"lat_{st.session_state.id_actual}")
+            with col_lon:
+                lon_input = st.number_input("Longitud", value=-77.0428, format="%.6f", key=f"lon_{st.session_state.id_actual}")
+            
+            try:
+                import folium
+                from streamlit_folium import st_folium
+                
+                m = folium.Map(location=[lat_input, lon_input], zoom_start=15, tiles=None)
+                
+                # Servidor directo de capas satelitales de Google Earth
+                folium.TileLayer(
+                    tiles='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+                    attr='Google Satellite',
+                    name='Google Earth',
+                    overlay=False,
+                    control=True
+                ).add_to(m)
+                
+                folium.Marker(
+                    [lat_input, lon_input],
+                    popup=f"Muestra: {st.session_state.id_actual}",
+                    icon=folium.Icon(color="green", icon="leaf")
+                ).add_to(m)
+                
+                st_folium(m, height=205, use_container_width=True, key=f"map_{st.session_state.id_actual}")
+                
+            except ImportError:
+                st.caption("💡 Tip: Instala `pip install streamlit-folium folium` para habilitar el mapa interactivo de Google Earth.")
+                df_mapa = {"lat": [lat_input], "lon": [lon_input]}
+                st.map(df_mapa, height=205)
+                
         st.divider()
         
         txt_oxi, txt_min, txt_bio, conclusion = generar_informe(
