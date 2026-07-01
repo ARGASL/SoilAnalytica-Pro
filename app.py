@@ -303,27 +303,30 @@ def exportar_pdf(id_m, analisis, conclusion):
     pdf = FPDF()
     pdf.add_page()
     
-    # Encabezado oscuro institucional
+    # Encabezado oscuro institucional (Fondo del banner principal)
     pdf.set_fill_color(14, 17, 23)
     pdf.rect(0, 0, 210, 38, 'F')
     
-    pdf.set_font("Arial", "B", 18)
+    # Título principal del reporte
+    pdf.set_font("Helvetica", "B", 18)
     pdf.set_textcolor(255, 255, 255)
-    pdf.cell(0, 10, "SoilAnalytica Pro - Reporte Tecnico", ln=True, align="C")
-    pdf.set_font("Arial", "I", 10)
-    pdf.cell(0, 5, "ANALYTICS & DIAGNOSTIC SYSTEM", ln=True, align="C")
+    pdf.cell(0, 10, "SoilAnalytica Pro - Reporte Tecnico", new_x="LMARGIN", new_y="NEXT", align="C")
+    
+    # Subtítulo del reporte
+    pdf.set_font("Helvetica", "I", 10)
+    pdf.cell(0, 5, "ANALYTICS & DIAGNOSTIC SYSTEM", new_x="LMARGIN", new_y="NEXT", align="C")
     pdf.ln(12)
     
-    # Datos generales de la muestra
+    # Sección de Metadatos e Información General de la Muestra
     pdf.set_textcolor(0, 0, 0)
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 8, f"ID de la Muestra: {id_m}", ln=True)
-    pdf.set_font("Arial", "", 10)
-    pdf.cell(0, 6, "Tipo de analisis: Cromatografia de Suelo (Pfeiffer)", ln=True)
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, f"ID de la Muestra: {id_m}", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_font("Helvetica", "", 10)
+    pdf.cell(0, 6, "Tipo de analisis: Cromatografia de Suelo (Pfeiffer)", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(5)
     
-    # Estructuración de Tabla Cuantitativa
-    pdf.set_font("Arial", "B", 11)
+    # Configuración de los encabezados de la Tabla Cuantitativa
+    pdf.set_font("Helvetica", "B", 11)
     pdf.set_fill_color(30, 41, 59)
     pdf.set_textcolor(255, 255, 255)
     
@@ -332,39 +335,44 @@ def exportar_pdf(id_m, analisis, conclusion):
     pdf.cell(90, 8, " Diagnostico Morfologico", border=1, fill=True)
     pdf.ln()
     
+    # Filas de datos de la tabla (con descripciones truncadas para evitar desbordamiento)
     pdf.set_textcolor(0, 0, 0)
-    pdf.set_font("Arial", "", 10)
+    pdf.set_font("Helvetica", "", 10)
     
+    # 1. Métrica de Oxigenación (Núcleo)
     pdf.cell(60, 8, " Oxigenacion (Nucleo)", border=1)
     pdf.cell(40, 8, f" {analisis['oxigenacion']}%", border=1, align="C")
     pdf.cell(90, 8, f" {analisis['patron_plumas'][:45]}...", border=1)
     pdf.ln()
     
+    # 2. Métrica de Mineralización (Zona Media)
     pdf.cell(60, 8, " Mineralizacion (Zona Media)", border=1)
     pdf.cell(40, 8, f" {analisis['mineralizacion']}%", border=1, align="C")
     pdf.cell(90, 8, f" {analisis['mineral_predominante'][:45]}...", border=1)
     pdf.ln()
     
+    # 3. Métrica de Biología (Zona Externa)
     pdf.cell(60, 8, " Biologia (Zona Externa)", border=1)
     pdf.cell(40, 8, f" {analisis['biologia']}%", border=1, align="C")
     pdf.cell(90, 8, f" {analisis['actividad_enzimatica'][:45]}...", border=1)
     pdf.ln()
     pdf.ln(6)
     
-    # Bloque de Conclusiones y Plan de Manejo
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 8, "Interpretacion Global y Plan de Manejo", ln=True)
+    # Sección de Conclusiones Generales y Recomendaciones de Manejo
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Interpretacion Global y Plan de Manejo", new_x="LMARGIN", new_y="NEXT")
     pdf.line(10, pdf.get_y(), 200, pdf.get_y())
     pdf.ln(3)
     
-    pdf.set_font("Arial", "", 10)
-    # Limpieza de caracteres de formato markdown para el PDF
+    # Limpieza automática de formato Markdown (para que el PDF se vea limpio sin asteriscos)
+    pdf.set_font("Helvetica", "", 10)
     texto_limpio = conclusion.replace("**", "").replace("•", "-")
     pdf.multi_cell(0, 5, texto_limpio)
     
+    # Pie de página / Firma de responsabilidad institucional
     pdf.ln(15)
-    pdf.set_font("Arial", "B", 9)
-    pdf.cell(0, 4, "SoilAnalytica Pro Intel Lab", ln=True, align="C")
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.cell(0, 4, "SoilAnalytica Pro Intel Lab", new_x="LMARGIN", new_y="NEXT", align="C")
     
     return pdf.output()
 # *****************************************************************************
