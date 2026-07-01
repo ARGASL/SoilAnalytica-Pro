@@ -5,3 +5,5 @@ plotly
 scipy
 folium
 streamlit-folium
+Plaintext
+fpdf2
