@@ -3,7 +3,12 @@ import cv2
 import numpy as np
 import plotly.graph_objects as go
 from scipy import stats
-from procesador import procesar_cromatograma
+from procesador import (
+    procesar_cromatograma, 
+    analizar_color_hsv_zonas, 
+    analizar_orillas_y_enzimas, 
+    analizar_plumas_cresta
+)
 
 st.set_page_config(layout="wide", page_title="SoilAnalytica Pro")
 
@@ -130,6 +135,11 @@ def analizar_radial_preciso(imagen):
         if len(autcorr) > 30:
             max_autcorr = np.max(autcorr[15:min(60, len(autcorr))])
             tiene_anillos = max_autcorr > np.mean(autcorr[20:]) * 1.25
+            
+    # LO QUE SE AGREGÓ: Procesamiento real de nuevos módulos
+    datos_color = analizar_color_hsv_zonas(imagen, cy, cx, max_r)
+    datos_orilla = analizar_orillas_y_enzimas(imagen, cy, cx, max_r)
+    datos_plumas = analizar_plumas_cresta(imagen, cy, cx, max_r)
     
     return {
         'oxigenacion': round(oxigenacion, 1),
@@ -138,7 +148,11 @@ def analizar_radial_preciso(imagen):
         'perfil_radial': rad_vals,
         'tiene_anillos': tiene_anillos,
         'max_r': max_r,
-        'paso': paso
+        'paso': paso,
+        # LO QUE SE AGREGÓ: Campos nuevos mapeados al retorno
+        'mineral_predominante': datos_color['mineral_predominante'],
+        'actividad_enzimatica': datos_orilla['actividad_enzimatica'],
+        'patron_plumas': datos_plumas['patron_plumas']
     }
 
 def detectar_caracteristicas(imagen, analisis):
@@ -174,7 +188,7 @@ def recomendar_organismos(oxi, minr, bio):
     if oxi >= 68 and minr >= 70 and bio >= 72:
         return """
         **Microorganismos benéficos sugeridos:**
-        • *Trichoderma spp.* - Control biológico y descomposición de materia orgánica
+        • *Trichoderma spp.* - Control biológico y BAM de materia orgánica
         • *Pseudomonas fluorescens* - Promotor de crecimiento y solubilización de fósforo
         • *Micorrizas arbusculares (Glomus spp.)* - Aumentan absorción de nutrientes
         • *Rhizobium spp.* - Fijación de nitrógeno (en leguminosas)
@@ -218,7 +232,6 @@ def generar_informe(id_m, analisis, caracteristicas):
     bio = analisis['biologia']
     minr = analisis['mineralizacion']
     
-    # Interpretación oxigenación
     if oxi >= 72:
         txt_oxi = f"Oxigenación: {oxi}% | Núcleo claro y bien aireado. La estructura porosa permite un intercambio gaseoso óptimo, facilitando la respiración radicular y la actividad aeróbica."
     elif oxi >= 62:
@@ -228,7 +241,6 @@ def generar_informe(id_m, analisis, caracteristicas):
     else:
         txt_oxi = f"Oxigenación: {oxi}% | Núcleo denso u oscuro. Existe un déficit crítico de aireación que afecta negativamente los procesos biológicos y químicos del suelo."
     
-    # Interpretación mineralización
     if minr >= 74:
         txt_min = f"Mineralización: {minr}% | Fase mineral bien integrada. Los nutrientes se encuentran disponibles en la matriz orgánico-mineral, con una cinética de liberación equilibrada."
     elif minr >= 64:
@@ -238,7 +250,6 @@ def generar_informe(id_m, analisis, caracteristicas):
     else:
         txt_min = f"Mineralización: {minr}% | Baja evolución mineral. El material orgánico presenta escasa integración, posiblemente por déficit de actividad microbiana o relación C/N inadecuada."
     
-    # Interpretación biología
     if bio >= 76:
         txt_bio = f"Biología: {bio}% | Actividad biológica sobresaliente. Se observan redes de hifas fúngicas, microagregados bacterianos y una estructura externa rugosa indicativa de alta colonización microbiana."
     elif bio >= 64:
@@ -248,13 +259,12 @@ def generar_informe(id_m, analisis, caracteristicas):
     else:
         txt_bio = f"Biología: {bio}% | Baja actividad biológica. La zona externa se presenta lisa o con escasa rugosidad, indicando déficit de colonización fúngica y bacteriana."
     
-    # Diagnóstico - Versión que te gusta
     if oxi >= 68 and minr >= 70 and bio >= 72:
         diagnosis = "Suelo equilibrado - Las tres fases se encuentran sincronizadas, indicando condiciones óptimas."
         manejo = "Mantener prácticas actuales. Monitoreo semestral."
     elif oxi >= 60 and minr >= 65 and bio >= 65:
         diagnosis = "Perfil en desarrollo - Evolución positiva con margen de mejora."
-        manejo = "Continuar con manejo orgánico y monitorear evolución."
+        manejo = "Continuar con manejo orgánico and monitorear evolución."
     elif oxi < 58:
         diagnosis = "Limitante primario: Oxigenación - Compactación o saturación del núcleo."
         manejo = "Mejorar estructura con materia orgánica gruesa y evitar compactación."
@@ -267,14 +277,14 @@ def generar_informe(id_m, analisis, caracteristicas):
     else:
         diagnosis = "Perfil asimétrico - Desbalance entre componentes evaluados."
         manejo = "Fortalecer el indicador de menor valor."
-    
+        
     microorganismos = recomendar_organismos(oxi, minr, bio)
     
     if caracteristicas:
         extra = f"\n\n**Hallazgos adicionales:** {', '.join(caracteristicas[:2])}"
     else:
         extra = ""
-    
+        
     conclusion = f"""
     **Diagnóstico:** {diagnosis}
     
@@ -309,7 +319,7 @@ with st.sidebar:
     if st.session_state.comparador:
         st.divider()
         st.caption("Comparando: " + ", ".join(st.session_state.comparador))
-    
+        
     st.divider()
     st.caption("Laboratorio de Suelos")
     st.caption("v1.0 | Aprendizaje con muestras reales")
@@ -413,6 +423,17 @@ if 'id_actual' in st.session_state:
         
         st.divider()
         
+        # LO QUE SE AGREGÓ: UI limpia para desplegar las nuevas métricas morfológicas extraídas
+        st.markdown("### 🔍 Análisis Morfológico y Cromático Avanzado")
+        col_inf1, col_inf2 = st.columns(2)
+        with col_inf1:
+            st.info(f"**Análisis de Plumas (Matriz Mineral):**\n{analisis['patron_plumas']}")
+            st.info(f"**Fase Cromática Multiespectral (HSV):**\n{analisis['mineral_predominante']}")
+        with col_inf2:
+            st.info(f"**Evaluación de Orillas (Actividad Enzimática):**\n{analisis['actividad_enzimatica']}")
+            
+        st.divider()
+        
         txt_oxi, txt_min, txt_bio, conclusion = generar_informe(
             st.session_state.id_actual, analisis, datos.get('caract', [])
         )
@@ -470,4 +491,3 @@ if 'id_actual' in st.session_state:
                 st.caption("🟢 Oxigenación | 🔵 Mineralización | 🟡 Biología")
 else:
     st.info("Cargue una imagen para comenzar")
-
