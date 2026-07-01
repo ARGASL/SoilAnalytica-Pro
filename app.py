@@ -480,7 +480,6 @@ if 'id_actual' in st.session_state:
                 st_folium(m, height=205, use_container_width=True, key=f"map_{st.session_state.id_actual}")
                 
             except ImportError:
-                st.caption("💡 Tip: Instala `pip install streamlit-folium folium` para habilitar el mapa interactivo de Google Earth.")
                 df_mapa = {"lat": [lat_input], "lon": [lon_input]}
                 st.map(df_mapa, height=205)
                 
