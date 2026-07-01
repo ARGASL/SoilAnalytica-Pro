@@ -426,7 +426,7 @@ if 'id_actual' in st.session_state:
        # =========================================================================
         # SECCIÓN REDISEÑADA: ANÁLISIS AVANZADO Y GEOLOCALIZACIÓN SATELITAL
         # =========================================================================
-        st.markdown("### 🔍 Análisis Morfológico, Cromático y Georreferenciación")
+        st.markdown("### Análisis Morfológico, Cromático y Georreferenciación")
         
         col_bloque_izq, col_bloque_der = st.columns([1, 1])
         
@@ -434,15 +434,15 @@ if 'id_actual' in st.session_state:
             st.markdown("<p style='color: #aaa; font-size: 13px; font-weight: bold; margin-bottom: 8px;'>DIAGNÓSTICO FORMAL DE MATRIZ</p>", unsafe_allow_html=True)
             st.markdown(f"""
             <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 12px;">
-                <span style="color: #58a6ff; font-weight: bold;">🪶 Análisis de Plumas:</span> 
+                <span style="color: #58a6ff; font-weight: bold;">Análisis de Plumas:</span> 
                 <div style="color: #e6edf3; font-size: 14px; margin-top: 4px;">{analisis['patron_plumas']}</div>
             </div>
             <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 12px;">
-                <span style="color: #ff7b72; font-weight: bold;">🎨 Fase Cromática (HSV):</span> 
+                <span style="color: #ff7b72; font-weight: bold;">Fase Cromática (HSV):</span> 
                 <div style="color: #e6edf3; font-size: 14px; margin-top: 4px;">{analisis['mineral_predominante']}</div>
             </div>
             <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 12px;">
-                <span style="color: #7ee787; font-weight: bold;">🌊 Evaluación de Orillas:</span> 
+                <span style="color: #7ee787; font-weight: bold;">Evaluación de Orillas:</span> 
                 <div style="color: #e6edf3; font-size: 14px; margin-top: 4px;">{analisis['actividad_enzimatica']}</div>
             </div>
             """, unsafe_allow_html=True)
